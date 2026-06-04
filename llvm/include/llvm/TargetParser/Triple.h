@@ -242,6 +242,7 @@ public:
     ShaderModel, // DirectX ShaderModel
     LiteOS,
     Serenity,
+    Scarlet,
     Vulkan, // Vulkan SPIR-V
     LastOSType = Vulkan
   };

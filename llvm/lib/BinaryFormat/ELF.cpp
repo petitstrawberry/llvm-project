@@ -655,6 +655,7 @@ uint8_t ELF::convertNameToOSABI(StringRef Name) {
       .StartsWith("amdhsa", ELFOSABI_AMDGPU_HSA)
       .StartsWith("amdpal", ELFOSABI_AMDGPU_PAL)
       .StartsWith("mesa3d", ELFOSABI_AMDGPU_MESA3D)
+      .StartsWith("scarlet", ELFOSABI_SCARLET)
       .StartsWith("arm", ELFOSABI_ARM)
       .StartsWith("standalone", ELFOSABI_STANDALONE)
       .StartsWith("none", ELFOSABI_NONE)
@@ -703,6 +704,8 @@ StringRef ELF::convertOSABIToName(uint8_t OSABI) {
     return "amdpal";
   case ELFOSABI_AMDGPU_MESA3D:
     return "mesa3d";
+  case ELFOSABI_SCARLET:
+    return "scarlet";
   case ELFOSABI_ARM:
     return "arm";
   case ELFOSABI_STANDALONE:

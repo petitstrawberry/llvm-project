@@ -80,6 +80,8 @@ public:
         return ELF::ELFOSABI_SOLARIS;
       case Triple::OpenBSD:
         return ELF::ELFOSABI_OPENBSD;
+      case Triple::Scarlet:
+        return ELF::ELFOSABI_SCARLET;
       default:
         return ELF::ELFOSABI_NONE;
     }
