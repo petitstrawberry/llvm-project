@@ -368,7 +368,23 @@ bool copy_file_impl(FileDescriptor& read_fd, FileDescriptor& write_fd, error_cod
 }
 #elif defined(_LIBCPP_FILESYSTEM_USE_FSTREAM)
 bool copy_file_impl(FileDescriptor& read_fd, FileDescriptor& write_fd, error_code& ec) {
+#if !_LIBCPP_HAS_LOCALIZATION
+  char buffer[16384];
+  for (;;) {
+    ssize_t n = ::read(read_fd.fd, buffer, sizeof(buffer));
+    if (n < 0) { if (errno == EINTR) continue; ec = capture_errno(); return false; }
+    if (!n) { ec.clear(); return true; }
+    ssize_t done = 0;
+    while (done < n) {
+      ssize_t count = ::write(write_fd.fd, buffer + done, n - done);
+      if (count < 0 && errno == EINTR) continue;
+      if (count <= 0) { ec = count < 0 ? capture_errno() : make_error_code(errc::io_error); return false; }
+      done += count;
+    }
+  }
+#else
   return copy_file_impl_fstream(read_fd, write_fd, ec);
+#endif
 }
 #else
 #  error "Unknown implementation for copy_file_impl"
