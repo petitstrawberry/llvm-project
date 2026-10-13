@@ -527,7 +527,13 @@ bool __create_directories(const path& p, error_code* ec) {
 bool __create_directory(const path& p, error_code* ec) {
   ErrorHandler<bool> err("create_directory", ec, &p);
 
-  if (detail::mkdir(p.c_str(), static_cast<int>(perms::all)) == 0)
+#if defined(__scarlet__)
+  // Native directory creation currently supports its default 0755 mode.
+  constexpr int directoryMode = 0755;
+#else
+  constexpr int directoryMode = static_cast<int>(perms::all);
+#endif
+  if (detail::mkdir(p.c_str(), directoryMode) == 0)
     return true;
 
   error_code mec = detail::get_last_error();
