@@ -586,7 +586,7 @@ void __create_symlink(path const& from, path const& to, error_code* ec) {
 path __current_path(error_code* ec) {
   ErrorHandler<path> err("current_path", ec);
 
-#if defined(_LIBCPP_WIN32API) || defined(__GLIBC__) || defined(__APPLE__)
+#if defined(_LIBCPP_WIN32API) || defined(__GLIBC__) || defined(__APPLE__) || defined(__scarlet__)
   // Common extension outside of POSIX getcwd() spec, without needing to
   // preallocate a buffer. Also supported by a number of other POSIX libcs.
   int size              = 0;
@@ -993,6 +993,13 @@ void __resize_file(const path& p, uintmax_t size, error_code* ec) {
 space_info __space(const path& p, error_code* ec) {
   ErrorHandler<void> err("space", ec, &p);
   space_info si;
+#if defined(__scarlet__)
+  // The native filesystem ABI does not expose volume capacity statistics.
+  // Report an unsupported operation instead of inventing capacity values.
+  si.capacity = si.free = si.available = static_cast<uintmax_t>(-1);
+  err.report(make_error_code(errc::function_not_supported));
+  return si;
+#else
   detail::StatVFS m_svfs = {};
   if (detail::statvfs(p.c_str(), &m_svfs) == -1) {
     err.report(detail::get_last_error());
@@ -1009,6 +1016,7 @@ space_info __space(const path& p, error_code* ec) {
   do_mult(si.free, m_svfs.f_bfree);
   do_mult(si.available, m_svfs.f_bavail);
   return si;
+#endif
 }
 
 file_status __status(const path& p, error_code* ec) { return detail::posix_stat(p, ec); }
